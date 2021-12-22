@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<meta name="author" content="Christopher Mann" />
+
+<meta name="date" content="2021-12-21" />
+
+<title>Building an Artificial Neural Network with ‘oops’ Layers to Forecast Inflation</title>
+
+<script src="data:application/javascript;base64,Ly8gUGFuZG9jIDIuOSBhZGRzIGF0dHJpYnV0ZXMgb24gYm90aCBoZWFkZXIgYW5kIGRpdi4gV2UgcmVtb3ZlIHRoZSBmb3JtZXIgKHRvCi8vIGJlIGNvbXBhdGlibGUgd2l0aCB0aGUgYmVoYXZpb3Igb2YgUGFuZG9jIDwgMi44KS4KZG9jdW1lbnQuYWRkRXZlbnRMaXN0ZW5lcignRE9NQ29udGVudExvYWRlZCcsIGZ1bmN0aW9uKGUpIHsKICB2YXIgaHMgPSBkb2N1bWVudC5xdWVyeVNlbGVjdG9yQWxsKCJkaXYuc2VjdGlvbltjbGFzcyo9J2xldmVsJ10gPiA6Zmlyc3QtY2hpbGQiKTsKICB2YXIgaSwgaCwgYTsKICBmb3IgKGkgPSAwOyBpIDwgaHMubGVuZ3RoOyBpKyspIHsKICAgIGggPSBoc1tpXTsKICAgIGlmICghL15oWzEtNl0kL2kudGVzdChoLnRhZ05hbWUpKSBjb250aW51ZTsgIC8vIGl0IHNob3VsZCBiZSBhIGhlYWRlciBoMS1oNgogICAgYSA9IGguYXR0cmlidXRlczsKICAgIHdoaWxlIChhLmxlbmd0aCA+IDApIGgucmVtb3ZlQXR0cmlidXRlKGFbMF0ubmFtZSk7CiAgfQp9KTsK"></script>
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+
+<style type="text/css">
+  code {
+    white-space: pre;
+  }
+  .sourceCode {
+    overflow: visible;
+  }
+</style>
+<style type="text/css" data-origin="pandoc">
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    for (var j = 0; j < rules.length; j++) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") continue;
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') continue;
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+
+<link rel="stylesheet" href="data:text/css,body%20%7B%0Abackground%2Dcolor%3A%20%23fff%3B%0Amargin%3A%201em%20auto%3B%0Amax%2Dwidth%3A%20700px%3B%0Aoverflow%3A%20visible%3B%0Apadding%2Dleft%3A%202em%3B%0Apadding%2Dright%3A%202em%3B%0Afont%2Dfamily%3A%20%22Open%20Sans%22%2C%20%22Helvetica%20Neue%22%2C%20Helvetica%2C%20Arial%2C%20sans%2Dserif%3B%0Afont%2Dsize%3A%2014px%3B%0Aline%2Dheight%3A%201%2E35%3B%0A%7D%0A%23TOC%20%7B%0Aclear%3A%20both%3B%0Amargin%3A%200%200%2010px%2010px%3B%0Apadding%3A%204px%3B%0Awidth%3A%20400px%3B%0Aborder%3A%201px%20solid%20%23CCCCCC%3B%0Aborder%2Dradius%3A%205px%3B%0Abackground%2Dcolor%3A%20%23f6f6f6%3B%0Afont%2Dsize%3A%2013px%3B%0Aline%2Dheight%3A%201%2E3%3B%0A%7D%0A%23TOC%20%2Etoctitle%20%7B%0Afont%2Dweight%3A%20bold%3B%0Afont%2Dsize%3A%2015px%3B%0Amargin%2Dleft%3A%205px%3B%0A%7D%0A%23TOC%20ul%20%7B%0Apadding%2Dleft%3A%2040px%3B%0Amargin%2Dleft%3A%20%2D1%2E5em%3B%0Amargin%2Dtop%3A%205px%3B%0Amargin%2Dbottom%3A%205px%3B%0A%7D%0A%23TOC%20ul%20ul%20%7B%0Amargin%2Dleft%3A%20%2D2em%3B%0A%7D%0A%23TOC%20li%20%7B%0Aline%2Dheight%3A%2016px%3B%0A%7D%0Atable%20%7B%0Amargin%3A%201em%20auto%3B%0Aborder%2Dwidth%3A%201px%3B%0Aborder%2Dcolor%3A%20%23DDDDDD%3B%0Aborder%2Dstyle%3A%20outset%3B%0Aborder%2Dcollapse%3A%20collapse%3B%0A%7D%0Atable%20th%20%7B%0Aborder%2Dwidth%3A%202px%3B%0Apadding%3A%205px%3B%0Aborder%2Dstyle%3A%20inset%3B%0A%7D%0Atable%20td%20%7B%0Aborder%2Dwidth%3A%201px%3B%0Aborder%2Dstyle%3A%20inset%3B%0Aline%2Dheight%3A%2018px%3B%0Apadding%3A%205px%205px%3B%0A%7D%0Atable%2C%20table%20th%2C%20table%20td%20%7B%0Aborder%2Dleft%2Dstyle%3A%20none%3B%0Aborder%2Dright%2Dstyle%3A%20none%3B%0A%7D%0Atable%20thead%2C%20table%20tr%2Eeven%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0A%7D%0Ap%20%7B%0Amargin%3A%200%2E5em%200%3B%0A%7D%0Ablockquote%20%7B%0Abackground%2Dcolor%3A%20%23f6f6f6%3B%0Apadding%3A%200%2E25em%200%2E75em%3B%0A%7D%0Ahr%20%7B%0Aborder%2Dstyle%3A%20solid%3B%0Aborder%3A%20none%3B%0Aborder%2Dtop%3A%201px%20solid%20%23777%3B%0Amargin%3A%2028px%200%3B%0A%7D%0Adl%20%7B%0Amargin%2Dleft%3A%200%3B%0A%7D%0Adl%20dd%20%7B%0Amargin%2Dbottom%3A%2013px%3B%0Amargin%2Dleft%3A%2013px%3B%0A%7D%0Adl%20dt%20%7B%0Afont%2Dweight%3A%20bold%3B%0A%7D%0Aul%20%7B%0Amargin%2Dtop%3A%200%3B%0A%7D%0Aul%20li%20%7B%0Alist%2Dstyle%3A%20circle%20outside%3B%0A%7D%0Aul%20ul%20%7B%0Amargin%2Dbottom%3A%200%3B%0A%7D%0Apre%2C%20code%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0Aborder%2Dradius%3A%203px%3B%0Acolor%3A%20%23333%3B%0Awhite%2Dspace%3A%20pre%2Dwrap%3B%20%0A%7D%0Apre%20%7B%0Aborder%2Dradius%3A%203px%3B%0Amargin%3A%205px%200px%2010px%200px%3B%0Apadding%3A%2010px%3B%0A%7D%0Apre%3Anot%28%5Bclass%5D%29%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0A%7D%0Acode%20%7B%0Afont%2Dfamily%3A%20Consolas%2C%20Monaco%2C%20%27Courier%20New%27%2C%20monospace%3B%0Afont%2Dsize%3A%2085%25%3B%0A%7D%0Ap%20%3E%20code%2C%20li%20%3E%20code%20%7B%0Apadding%3A%202px%200px%3B%0A%7D%0Adiv%2Efigure%20%7B%0Atext%2Dalign%3A%20center%3B%0A%7D%0Aimg%20%7B%0Abackground%2Dcolor%3A%20%23FFFFFF%3B%0Apadding%3A%202px%3B%0Aborder%3A%201px%20solid%20%23DDDDDD%3B%0Aborder%2Dradius%3A%203px%3B%0Aborder%3A%201px%20solid%20%23CCCCCC%3B%0Amargin%3A%200%205px%3B%0A%7D%0Ah1%20%7B%0Amargin%2Dtop%3A%200%3B%0Afont%2Dsize%3A%2035px%3B%0Aline%2Dheight%3A%2040px%3B%0A%7D%0Ah2%20%7B%0Aborder%2Dbottom%3A%204px%20solid%20%23f7f7f7%3B%0Apadding%2Dtop%3A%2010px%3B%0Apadding%2Dbottom%3A%202px%3B%0Afont%2Dsize%3A%20145%25%3B%0A%7D%0Ah3%20%7B%0Aborder%2Dbottom%3A%202px%20solid%20%23f7f7f7%3B%0Apadding%2Dtop%3A%2010px%3B%0Afont%2Dsize%3A%20120%25%3B%0A%7D%0Ah4%20%7B%0Aborder%2Dbottom%3A%201px%20solid%20%23f7f7f7%3B%0Amargin%2Dleft%3A%208px%3B%0Afont%2Dsize%3A%20105%25%3B%0A%7D%0Ah5%2C%20h6%20%7B%0Aborder%2Dbottom%3A%201px%20solid%20%23ccc%3B%0Afont%2Dsize%3A%20105%25%3B%0A%7D%0Aa%20%7B%0Acolor%3A%20%230033dd%3B%0Atext%2Ddecoration%3A%20none%3B%0A%7D%0Aa%3Ahover%20%7B%0Acolor%3A%20%236666ff%3B%20%7D%0Aa%3Avisited%20%7B%0Acolor%3A%20%23800080%3B%20%7D%0Aa%3Avisited%3Ahover%20%7B%0Acolor%3A%20%23BB00BB%3B%20%7D%0Aa%5Bhref%5E%3D%22http%3A%22%5D%20%7B%0Atext%2Ddecoration%3A%20underline%3B%20%7D%0Aa%5Bhref%5E%3D%22https%3A%22%5D%20%7B%0Atext%2Ddecoration%3A%20underline%3B%20%7D%0A%0Acode%20%3E%20span%2Ekw%20%7B%20color%3A%20%23555%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%0Acode%20%3E%20span%2Edt%20%7B%20color%3A%20%23902000%3B%20%7D%20%0Acode%20%3E%20span%2Edv%20%7B%20color%3A%20%2340a070%3B%20%7D%20%0Acode%20%3E%20span%2Ebn%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Efl%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Ech%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Est%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Eco%20%7B%20color%3A%20%23888888%3B%20font%2Dstyle%3A%20italic%3B%20%7D%20%0Acode%20%3E%20span%2Eot%20%7B%20color%3A%20%23007020%3B%20%7D%20%0Acode%20%3E%20span%2Eal%20%7B%20color%3A%20%23ff0000%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%0Acode%20%3E%20span%2Efu%20%7B%20color%3A%20%23900%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%0Acode%20%3E%20span%2Eer%20%7B%20color%3A%20%23a61717%3B%20background%2Dcolor%3A%20%23e3d2d2%3B%20%7D%20%0A" type="text/css" />
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Building an Artificial Neural Network with ‘oops’ Layers to Forecast Inflation</h1>
+<h4 class="author">Christopher Mann</h4>
+<h4 class="date">2021-12-21</h4>
+
+
+
+<p>I discuss how to use the <code>oops</code> package in R to create an artificial neural network by hand, then train the network to forecast price inflation. This is for illustrative purposes and is not intended as an optimal method of either building a neural network or forecasting inflation.</p>
+<div id="introduction-to-artificial-neural-networks" class="section level2">
+<h2>Introduction to Artificial Neural Networks</h2>
+<p>Most discussions of artificial neural networks start with a graph of interconnected circles to demonstrate how the network connects data inputs to output through different “hidden layers”. Those graphs are overly complex and obfuscate the network’s internal structure. I think that the best way to start is to think about a regression. A regression takes a set of <em>independent</em> variables and relates it to another <em>dependent</em> variable through a specified function, such as relating height, exercise, and eating habits to weight. Mathematically, this is</p>
+<p><span class="math display">\[\widehat{y} = f(\beta\cdot X)\]</span></p>
+<p>where <span class="math inline">\(X\)</span> is a matrix of independent variables, <span class="math inline">\(\beta\)</span> is a vector of regression coefficients that describe the importance of each variable, <span class="math inline">\(f(\bullet)\)</span> is the function, and <span class="math inline">\(\widehat{y}\)</span> is the prediction of the dependent variable. The simple linear regression that plots the best-fitting, straight line through a series of data point just uses the linear function <span class="math inline">\(f(x) = x\)</span>. A regression typically solves for <span class="math inline">\(\beta\)</span> by minimizing some loss function, commonly the sum of squared prediction error for each observation - <span class="math inline">\(\sum_i \left(y_i - \widehat{y}_i\right)^2\)</span>.</p>
+<p>Neural networks expand the idea of regression by nesting multiple functions and sets of coefficient weights.</p>
+<p><span class="math display">\[\widehat{y} = f_n \left(\dots f_2\left(\beta_2\cdot f_1\left(\beta_1\cdot X\right)\right)\right)\]</span></p>
+<p>Each of the <span class="math inline">\(n\)</span> functions above and their weights are the network’s <em>layers</em>, <span class="math inline">\(n-1\)</span> of which are often considered “hidden”. The nested functions add nonlinearity and allow complex relationships to exist relative to standard regressions. Note that this simplifies to a single, linear function if all <span class="math inline">\(f\)</span> are linear.</p>
+<p>The different <span class="math inline">\(\beta\)</span>’s are estimated by starting with an original guess, then feeding the input matrix <span class="math inline">\(X\)</span> forward through each function to end up with a prediction. The prediction for each observation is compared to its original value to determine the error. The error is then used with the gradient of each function, starting with the last function, to determine how to update each <span class="math inline">\(\beta\)</span>. This is called backpropagation and the process repeats until the error is sufficiently small or the maximum number of iterations are reached.</p>
+</div>
+<div id="implementation" class="section level2">
+<h2>Implementation</h2>
+<p>To implement a neural network, we will use the ‘oops’ library in R to create a Layer Class. <code>Class()</code> creates a function that generates <code>Layer</code> objects. The argument <code>&quot;Layer&quot;</code> gives each instance the S3 class name “Layer” to use with the different methods.</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(oops)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>Layer <span class="ot">&lt;-</span> <span class="fu">oClass</span>(<span class="st">&quot;Layer&quot;</span>)</span></code></pre></div>
+<p>Each layer will have a set of weights, or <span class="math inline">\(\beta\)</span> in previous examples. The dimensions of beta will vary for each instance of the layer, so they will be provided when created. Once the dimensions are known, beta can be initialized to set of random numbers. Though we will initialize beta to a specific set of values in this example to ensure that the vignette is reproducible. We will also keep track of the output in each layer for backpropagation.</p>
+<p>We will create an <code>init</code> method for “Layer” objects that takes the dimensions and populates the object fields accordingly. <code>init()</code> is automatically called on each new <code>oops</code> Class instance.</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>init.Layer <span class="ot">&lt;-</span> <span class="cf">function</span>(self, dim){</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  self<span class="sc">$</span>dim    <span class="ot">&lt;-</span> dim</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>  self<span class="sc">$</span>beta   <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">rep</span>(<span class="fl">0.01</span>, <span class="fu">prod</span>(dim)), <span class="at">nrow =</span> dim[<span class="dv">1</span>])</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>  self<span class="sc">$</span>output <span class="ot">&lt;-</span> <span class="dv">0</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(self)</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<p>Each layer is also associated with a particular activation function and its derivative. We could include this in <code>init</code> function above, but another solution is to create a different <code>Class</code> associated with each function. As long as the new class inherits our <code>Layer</code> Class, the <code>init()</code> function will continue to work.</p>
+<p>Most neural network layers use the same activation function in all layers. However, this exercise is primarily for demonstration purpose; so we will use three different functions.</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>Layer_Relu <span class="ot">&lt;-</span> <span class="fu">oClass</span>(</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">inherit =</span> Layer,</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">active_fun =</span> <span class="cf">function</span>(x) <span class="fu">ifelse</span>(x <span class="sc">&lt;=</span> <span class="dv">0</span>, <span class="dv">0</span>, x),</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">deriv_fun  =</span> <span class="cf">function</span>(x) <span class="fu">ifelse</span>(x <span class="sc">&lt;=</span> <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">1</span>)</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Warning in create_oclass(dots, name = name, inherit = inherit, portable</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; = portable, : Classes should be named to ensure that methods are properly</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; deployed.</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>Layer_Gcu <span class="ot">&lt;-</span> <span class="fu">oClass</span>(</span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">inherit =</span> Layer, </span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">active_fun =</span> <span class="cf">function</span>(x) x<span class="sc">*</span><span class="fu">cos</span>(x),</span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>  <span class="at">deriv_fun  =</span> <span class="cf">function</span>(x) <span class="fu">cos</span>(x) <span class="sc">-</span> x<span class="sc">*</span><span class="fu">sin</span>(x)</span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Warning in create_oclass(dots, name = name, inherit = inherit, portable</span></span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; = portable, : Classes should be named to ensure that methods are properly</span></span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; deployed.</span></span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a>Layer_Softplus <span class="ot">&lt;-</span> <span class="fu">oClass</span>(</span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a>  <span class="at">inherit =</span> Layer,</span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a>  <span class="at">active_fun =</span> <span class="cf">function</span>(x) <span class="fu">log</span>(<span class="dv">1</span><span class="sc">+</span><span class="fu">exp</span>(x)),</span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a>  <span class="at">deriv_fun  =</span> <span class="cf">function</span>(x) <span class="dv">1</span><span class="sc">/</span>(<span class="dv">1</span><span class="sc">+</span><span class="fu">exp</span>(<span class="sc">-</span>x))</span>
+<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Warning in create_oclass(dots, name = name, inherit = inherit, portable</span></span>
+<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; = portable, : Classes should be named to ensure that methods are properly</span></span>
+<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; deployed.</span></span></code></pre></div>
+<p>Note the difference between each of the <code>Class</code> objects above and the original <code>Layer</code> class. First, I did not provide a name for each class, which issued a warning. This is ok since I do not need to distinguish between the individual layer types - this can be done by examining the activation function if necessary. Also, each new class inherits from <code>Layer</code>, meaning that “Layer” methods will already deploy on each new instance.</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">class</span>( <span class="fu">Layer_Relu</span>(<span class="dv">1</span>) )</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] &quot;Layer&quot;    &quot;Instance&quot;</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="fu">ls</span>( <span class="fu">Layer_Relu</span>(<span class="dv">1</span>) )</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] &quot;beta&quot;   &quot;dim&quot;    &quot;output&quot;</span></span></code></pre></div>
+<p>The other difference is that the values for each function are provided at the time of Class creation. Any named value passed to <code>Class()</code> is stored as field that all instances inherit. For example, all instances created by <code>Layer_Relu</code> can automatically access the <code>active_fun</code> field, though they do not directly store it. This is why <code>active_fun</code> did not show up when <code>ls()</code> was used above.</p>
+<p>Now that we have our layers, let us build a Class for our neural network.</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>NNetwork <span class="ot">&lt;-</span> <span class="fu">oClass</span>(<span class="st">&quot;NNetwork&quot;</span>)</span></code></pre></div>
+<p>Each network needs to initialize with a dependent <span class="math inline">\(y\)</span> variable and a matrix of independent <span class="math inline">\(X\)</span> variables. It also needs to store the layers - we will use one of each of the three we created. Finally, we will train the network by fitting our beta weights to the data.</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>init.NNetwork <span class="ot">&lt;-</span> <span class="cf">function</span>(self, y, x){</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>  self<span class="sc">$</span>y      <span class="ot">&lt;-</span> y</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>  self<span class="sc">$</span>X      <span class="ot">&lt;-</span> X</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>  self<span class="sc">$</span>layers <span class="ot">&lt;-</span> <span class="fu">list</span>(</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">Layer_Gcu</span>( <span class="at">dim=</span><span class="fu">c</span>(<span class="fu">ncol</span>(X), <span class="dv">4</span>) ),</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">Layer_Relu</span>( <span class="at">dim=</span><span class="fu">c</span>(<span class="dv">4</span>, <span class="dv">2</span>) ),</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">Layer_Softplus</span>( <span class="at">dim=</span><span class="fu">c</span>(<span class="dv">2</span>,<span class="dv">1</span>) )</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">train_nn</span>(self)</span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<p>Fitting a neural network involves two steps: feeding the data through each of the layers, then propagating the error backwards through each layer to adjust the weights. This is repeated until the change in the error is sufficiently small or a number of iterations, or epochs, has been reached. So, let us add some starting values to our neural network Class to store these values, and some additional control variables.</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>NNetwork<span class="sc">$</span>mse        <span class="ot">&lt;-</span> <span class="cn">Inf</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>NNetwork<span class="sc">$</span>epoch      <span class="ot">&lt;-</span> <span class="dv">0</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>NNetwork<span class="sc">$</span>tolerance  <span class="ot">&lt;-</span> <span class="fl">1e-08</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>NNetwork<span class="sc">$</span>max_epoch  <span class="ot">&lt;-</span> <span class="dv">5000</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>NNetwork<span class="sc">$</span>learn_rate <span class="ot">&lt;-</span> <span class="fl">0.2</span></span></code></pre></div>
+<p>One of the included control variables is the learning rate. This determines how much we will change our beta weights in each epoch. If this value is too high, our betas may oscillate around their optimal values without reaching them. If it is too low, then the number of epochs will grow without limit (or hit the maximum) and we may never reach the best set of values.</p>
+<p>Next, let us create our <code>train_nn</code> function.</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>train_nn <span class="ot">&lt;-</span> <span class="cf">function</span>(nn){</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>  <span class="cf">while</span>(<span class="cn">TRUE</span>) {</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>    nn<span class="sc">$</span>epoch <span class="ot">&lt;-</span> nn<span class="sc">$</span>epoch <span class="sc">+</span> <span class="dv">1</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (nn<span class="sc">$</span>epoch <span class="sc">&gt;=</span> nn<span class="sc">$</span>max_epoch) <span class="cf">break</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>    out  <span class="ot">&lt;-</span> <span class="fu">feed_forward</span>(nn)          <span class="co"># returns output of last layer</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>    diff <span class="ot">&lt;-</span> <span class="fu">back_propagate</span>(nn, out)   <span class="co"># returns change in mse</span></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (diff <span class="sc">&lt;</span> nn<span class="sc">$</span>tolerance){</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>      nn<span class="sc">$</span>flag <span class="ot">&lt;-</span> <span class="dv">1</span></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>      <span class="cf">break</span></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>  nn</span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<p>To feed forward, we start with our input <code>X</code> and apply it to each layer’s activation function sequentially, keeping track of the output at each step for adjustment purposes later. We will return the final output so that we can easily pass it into the next backpropagation step.</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>feed_forward <span class="ot">&lt;-</span> <span class="cf">function</span>(nn){</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>  output <span class="ot">&lt;-</span> nn<span class="sc">$</span>X</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (layer <span class="cf">in</span> nn<span class="sc">$</span>layers){</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>    output <span class="ot">&lt;-</span> layer<span class="sc">$</span><span class="fu">active_fun</span>(output <span class="sc">%*%</span> layer<span class="sc">$</span>beta)</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>    layer<span class="sc">$</span>output <span class="ot">&lt;-</span> output</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>  output</span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<p>Feeding the data through the layers is the easy part. Changing the weights is more difficult. We use a method called gradient descent, which takes the derivative of the activation function in each layer and moves along it depending the relative size of the error.</p>
+<p>For the algorithm, we start at the last layer and calculate the loss gradient, <span class="math inline">\(\delta\)</span>. Let <span class="math inline">\(\epsilon = \left(y - \widehat{y}\right)\)</span> be the total prediction error and <span class="math inline">\(f_i^\prime\left(z_i\right)\)</span> be the derivative of the activation function of layer <span class="math inline">\(i\)</span> applied to its output. Finally, let <span class="math inline">\(\cdot\)</span> represent element-wise multiplication, while <span class="math inline">\(\times\)</span> is matrix multiplication.</p>
+<p>For the last layer,</p>
+<p><span class="math display">\[\delta_L = \epsilon\cdot f_L^\prime\left(z_L\right)\]</span></p>
+<p>The loss gradient for each other layer is calculated recursively by</p>
+<p><span class="math display">\[\delta_i = \left[\beta_{i+1}^T \times \delta_{i+1}\right]\cdot f_i^\prime\left(z_i\right)\]</span> Finally, our change in weights for each layer is determined by multiplying the output from the previous layer by the loss gradient. The initial layer uses the original input matrix.</p>
+<p><span class="math display">\[\Delta \beta_i = -z_{i-1}^T \times \delta_i\]</span> Since we are calculating the error in this step, we might as well calculate the mean square error and return how it is changing at each iteration.</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>back_propagate <span class="ot">&lt;-</span> <span class="cf">function</span>(nn, output){</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>  error  <span class="ot">&lt;-</span> output <span class="sc">-</span> nn<span class="sc">$</span>y</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>  delta  <span class="ot">&lt;-</span> <span class="dv">2</span><span class="sc">*</span>error<span class="sc">/</span><span class="fu">length</span>(output)     <span class="co"># Loss = sum(error^2)/n =&gt; dLoss = 2/n*error</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>  nlayer <span class="ot">&lt;-</span> <span class="fu">length</span>(nn<span class="sc">$</span>layers)</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (i <span class="cf">in</span> nlayer<span class="sc">:</span><span class="dv">1</span>){</span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>    layeri <span class="ot">&lt;-</span> nn<span class="sc">$</span>layers[[i]]</span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (i <span class="sc">==</span> nlayer){</span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>      delta <span class="ot">&lt;-</span> layeri<span class="sc">$</span><span class="fu">deriv_fun</span>(output) <span class="sc">*</span> delta</span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>    } <span class="cf">else</span> {</span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>      delta <span class="ot">&lt;-</span> (delta <span class="sc">%*%</span> <span class="fu">t</span>(nn<span class="sc">$</span>layers[[i<span class="sc">+</span><span class="dv">1</span>]]<span class="sc">$</span>beta)) <span class="sc">*</span></span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>        layeri<span class="sc">$</span><span class="fu">deriv_fun</span>(layeri<span class="sc">$</span>output)</span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (i <span class="sc">==</span> <span class="dv">1</span>){</span>
+<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a>      dweight <span class="ot">&lt;-</span> <span class="fu">t</span>(nn<span class="sc">$</span>X) <span class="sc">%*%</span> delta</span>
+<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a>    } <span class="cf">else</span> {</span>
+<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a>      dweight <span class="ot">&lt;-</span> <span class="fu">t</span>(nn<span class="sc">$</span>layers[[i<span class="dv">-1</span>]]<span class="sc">$</span>output) <span class="sc">%*%</span> delta</span>
+<span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb10-19"><a href="#cb10-19" aria-hidden="true" tabindex="-1"></a>    layeri<span class="sc">$</span>beta <span class="ot">&lt;-</span> layeri<span class="sc">$</span>beta <span class="sc">-</span> nn<span class="sc">$</span>learn_rate <span class="sc">*</span> dweight</span>
+<span id="cb10-20"><a href="#cb10-20" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb10-21"><a href="#cb10-21" aria-hidden="true" tabindex="-1"></a>  mse    <span class="ot">&lt;-</span> <span class="fu">mean</span>(error<span class="sc">^</span><span class="dv">2</span>)</span>
+<span id="cb10-22"><a href="#cb10-22" aria-hidden="true" tabindex="-1"></a>  dmse   <span class="ot">&lt;-</span> <span class="fu">abs</span>(nn<span class="sc">$</span>mse <span class="sc">-</span> mse)</span>
+<span id="cb10-23"><a href="#cb10-23" aria-hidden="true" tabindex="-1"></a>  nn<span class="sc">$</span>mse <span class="ot">&lt;-</span> mse</span>
+<span id="cb10-24"><a href="#cb10-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(dmse)</span>
+<span id="cb10-25"><a href="#cb10-25" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<p>All we have left now is our prediction function. This will look very similar to the <code>feed_forward()</code> function defined above, except that the output at each layer is not saved.</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>predict_nn <span class="ot">&lt;-</span> <span class="cf">function</span>(nn, X){</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>  output <span class="ot">&lt;-</span> X</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (layer <span class="cf">in</span> nn<span class="sc">$</span>layers){</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>    output <span class="ot">&lt;-</span> layer<span class="sc">$</span><span class="fu">active_fun</span>(output <span class="sc">%*%</span> layer<span class="sc">$</span>beta)</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>  output</span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+</div>
+<div id="application-predicting-inflation" class="section level2">
+<h2>Application: Predicting Inflation</h2>
+<p>We need some data to apply our artificial neural network. The data is available using <code>data(cpi_data)</code> in the <code>oops</code> package, but this will demonstrate how to construct the data set as well. We will use the <code>eFRED</code> package to download the consumer price index.</p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(eFRED)</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>dat <span class="ot">&lt;-</span> <span class="fu">fred</span>(<span class="st">&quot;CPIAUCSL&quot;</span>) </span></code></pre></div>
+<p>To calculate annual inflation, we find the log difference of CPI and its 12 month lag. We can also calculate several past values of price inflation to use as our independent variables.</p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>cpi_data <span class="ot">&lt;-</span> dat <span class="sc">%&gt;%</span>  <span class="fu">transmute</span>(</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>    date,</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">pi    =</span> <span class="fu">log</span>(CPIAUCSL) <span class="sc">-</span> <span class="fu">log</span>(<span class="fu">lag</span>(CPIAUCSL, <span class="dv">12</span>)),</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">pi.1  =</span> <span class="fu">lag</span>(pi, <span class="dv">1</span>),</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">pi.2  =</span> <span class="fu">lag</span>(pi, <span class="dv">2</span>),</span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">pi.3  =</span> <span class="fu">lag</span>(pi, <span class="dv">3</span>),</span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">pi.6  =</span> <span class="fu">lag</span>(pi, <span class="dv">6</span>),</span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">pi.12 =</span> <span class="fu">lag</span>(pi, <span class="dv">12</span>)</span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">%&gt;%</span></span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>  na.omit</span></code></pre></div>
+<p>Now, let us split the dataset into training and test sets that will be used for fitting and evaluating the network accordingly.</p>
+<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>train <span class="ot">&lt;-</span> cpi_data[<span class="fu">which</span>(cpi_data<span class="sc">$</span>date <span class="sc">&lt;=</span> <span class="fu">as.Date</span>(<span class="st">&quot;2019-12-01&quot;</span>)),]</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>test  <span class="ot">&lt;-</span> cpi_data[<span class="fu">which</span>(cpi_data<span class="sc">$</span>date <span class="sc">&gt;</span> <span class="fu">as.Date</span>(<span class="st">&quot;2019-12-01&quot;</span>) <span class="sc">&amp;&amp;</span> cpi_data<span class="sc">$</span>date <span class="sc">&lt;</span> <span class="fu">as.Date</span>(<span class="st">&quot;2021-01-01&quot;</span>)),]</span></code></pre></div>
+<p>Now we train an artificial neural network with our training data.</p>
+<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>y <span class="ot">&lt;-</span> <span class="fu">as.matrix</span>(train<span class="sc">$</span>pi, <span class="at">ncol=</span><span class="dv">1</span>) </span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>X <span class="ot">&lt;-</span> <span class="fu">cbind</span>(<span class="dv">1</span>, <span class="fu">as.matrix</span>(train[,<span class="dv">3</span><span class="sc">:</span><span class="dv">7</span>]))</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>nn <span class="ot">&lt;-</span> <span class="fu">NNetwork</span>(y, X)</span></code></pre></div>
+<p>Note that <code>nn</code> is an <code>oops</code> Class object holding all of the network information. We can check the number iterations and the mean squared error accordingly. We can also check the weights for each layer, though these can be difficult to interpret compared to linear regression coefficients.</p>
+<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>nn<span class="sc">$</span>epoch</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] 4337</span></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>nn<span class="sc">$</span>mse</span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] 0.0001611906</span></span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>nn<span class="sc">$</span>layers[[<span class="dv">1</span>]]<span class="sc">$</span>beta</span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;             [,1]       [,2]       [,3]       [,4]</span></span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;        0.4329761  0.4329761  0.4329761  0.4329761</span></span>
+<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; pi.1  -0.4688054 -0.4688054 -0.4688054 -0.4688054</span></span>
+<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; pi.2  -0.4537249 -0.4537249 -0.4537249 -0.4537249</span></span>
+<span id="cb16-12"><a href="#cb16-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; pi.3  -0.4372365 -0.4372365 -0.4372365 -0.4372365</span></span>
+<span id="cb16-13"><a href="#cb16-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; pi.6  -0.3863754 -0.3863754 -0.3863754 -0.3863754</span></span>
+<span id="cb16-14"><a href="#cb16-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; pi.12 -0.2635620 -0.2635620 -0.2635620 -0.2635620</span></span></code></pre></div>
+<p>To predict the level of price inflation in the next period, we take the last columns of our testing data set and feed it into the neural network. Note that this approach assumes that we are only predicting one period ahead since we are using all of the most recent data for each observation.</p>
+<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>Xtest <span class="ot">&lt;-</span> <span class="fu">cbind</span>(<span class="dv">1</span>, <span class="fu">as.matrix</span>(test[, <span class="dv">3</span><span class="sc">:</span><span class="dv">7</span>]))</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Warning in cbind(1, as.matrix(test[, 3:7])): number of rows of result is not a</span></span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; multiple of vector length (arg 1)</span></span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>prediction <span class="ot">&lt;-</span> <span class="fu">predict_nn</span>(nn, Xtest)</span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>prediction</span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;      [,1]</span></span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a><span class="fu">mean</span>(prediction <span class="sc">-</span> test<span class="sc">$</span>pi) <span class="co"># Average error</span></span>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] NaN</span></span></code></pre></div>
+<p>Note that an ordinary least squares regression actually performs better than the previous value. Artificial neural networks do not always provide superior forecasts to less sophisticated methods. A lot of tuning of model parameters and the number of types of layers are necessary to produce optimal forecasts.</p>
+<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>ols <span class="ot">&lt;-</span> <span class="fu">lm</span>(y<span class="sc">~-</span><span class="dv">1</span><span class="sc">+</span>X, <span class="at">data =</span> train)</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a><span class="fu">mean</span>(Xtest <span class="sc">%*%</span> <span class="fu">as.matrix</span>(ols<span class="sc">$</span>coeff) <span class="sc">-</span> test<span class="sc">$</span>pi)</span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] NaN</span></span></code></pre></div>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

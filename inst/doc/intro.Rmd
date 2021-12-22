@@ -1,0 +1,301 @@
+---
+title: "Introduction to 'oops' Classes"
+author: "Christopher Mann"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Introduction to 'oops' Classes}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+
+The `oops` package simplifies the creation of classes with reference semantics in R. Though similar to refclasses or `R6` classes, `oops` classes are designed to integrate seamlessly into the R ecosystem by behaving similar to objects such as lists. In this tutorial, I walk through the creation and use of oClasses.
+
+First, we need to load the `oops` library.
+
+```{r}
+library(oops)
+```
+
+## Creating oClasses and oClass Instances
+
+Let us start by creating a simple class generator using the `oClass(...)` function. Our class will be an economic agent that holds cash that it can transfer to others.
+
+The `oClass` function has a number of arguments to control the how the class is built. The most important is its name. This is not strictly necessary, but defines how S3 methods won't be properly deployed without it. General named arguments, such as `cash` below, can be passed to `oClass` to be populated within the class instance.
+
+```{r}
+Agent <- oClass(
+  "Agent",
+  cash  = 0
+)
+```
+
+`Agent` is now a function that generates oClass instances of class `"Agent"`. Calling `Agent` prints the oClass name, the generator's formal arguments, and its default objects. 
+
+```{r}
+Agent
+```
+
+To create an Agent instance, we just call the generator function.
+
+```{r}
+agent1 <- Agent()
+agent2 <- Agent()
+
+agent1
+```
+
+Note that printing `agent1` is uninformative; this is due in part to `agent1` actually being empty. The cash variable is linked to the `Agent` generator, not the individual instance. However, the generator is in each instance's search path, so `agent1` can access cash.
+
+```{r}
+agent1$cash
+```
+
+This setup reduces the amount of copying that occurs when creating an instance; only a pointer to the generator is needed. If the underlying cash variable of the generator is changed, though, both instances automatically incorporate it.
+
+```{r}
+Agent$cash <- 10
+agent1$cash
+```
+
+Changing the cash variable for an instance does not impact other instances though.
+
+```{r}
+agent1$cash <- 250
+agent1$cash 
+
+agent2$cash
+```
+
+Similarly, adding a variable to the generator gives all instances access to it, even after creation. Though this is only operative if the instance does not already have access to the variable.
+
+```{r}
+agent2$items <- list("computer", "code")
+
+Agent$items <- list()
+agent1$items
+
+agent2$items
+```
+
+## The 'init' Method
+
+Our agents currently have access to cash, but we may need a quick way to identify each one other than its current holdings. We could create an "id" field in the generator. However, each instance will inherit the same value. An alternative solution is to use the `init(x, ...)` function. 
+
+`init` is automatically called on each newly created oClass instance. This generally adds all named variables passed through `...` during the generator call to new instance. But, this behavior can be modified by creating a custom `init` method for the oClass.
+
+For our custom initialization function, we will create a random number and assign it to the id.
+
+```{r}
+init.Agent <- function(x, ...){
+  x$id <- round(runif(1) * 10000)
+  init_next(x, ...)
+  return(x)
+}
+```
+
+The `init` function also contains a call to `init_next`. This calls the `init` method of the "superclass" of the object, or the next class. Since the class of each agent is `c("Agent", "Instance")`, `init_next` calls the `init.Instance` method. This adds the contents of `...` to instance.
+
+```{r}
+# Create new agent and check id
+agent1 <- Agent()
+agent1$id
+
+# Create a new agent with extra field (initialized through init.Instance)
+agent2 <- Agent(name = "Dave")
+agent2$id   # different from agent1
+
+agent2$name
+```
+
+
+## Creating Other Methods
+
+As we saw above, printing an Agent is not very informative. We can change this by adding a print method in the exact same way as other classes.
+
+```{r}
+print.Agent <- function(x, ...){
+  text <- paste0("Agent, #", x$id, ": $", x$cash, "\n")
+  cat(text)
+}
+
+agent1
+agent2
+```
+
+One of the key differences between `oops` classes and standard lists is that they are passed by reference so that changes to the object within a function persist afterwards. 
+
+To see this, let us create a function that transfers money between different agents. The function will take two different agents and a cash amount. Since we have given our Agent a name, we can create an Agent-specific method.  
+
+```{r}
+transfer <- function(from, to, amount) UseMethod("transfer")
+transfer.Agent <- function(from, to, amount){
+  from$cash <- from$cash - amount
+  to$cash   <- to$cash   + amount
+}
+```
+
+Now, let us test out the function by transferring 2 dollars between `agent1` and `agent2`.
+
+```{r}
+transfer(agent1, agent2, 2)
+
+agent1
+agent2
+```
+
+It worked! The results of the transfer persisted outside of the function and there was no need to return the two agents. 
+
+This can be very dangerous and breaks with the philosophy of R because it may lead to side effects that are not obvious. For example, another function may call transfer and lead to a permanent change when you only want it to be temporary. One solution is to `clone` the agent, which makes a copy of the instance.
+
+```{r}
+fake_agent1 <- clone(agent1)
+agent1
+fake_agent1
+
+identical(agent1, fake_agent1)
+```
+
+Note that `clone` only makes a copy of the agent, not any other reference objects such as environments or `oops` instances that the agent references. 
+
+```{r}
+agent1[["partner"]] <- agent2
+fake_agent1 <- clone(agent1)
+
+identical(agent1$partner, fake_agent1$partner) # Same!
+```
+
+Use `deep=TRUE` to make a deep clone of the instance. This will create a new copy of each environment within the instance. `clone` does keep track of any cloned environments to prevent infinite recursion and ensure that multiple points to the same environment behave correctly after cloning.
+
+```{r}
+fake_agent1 <- clone(agent1, deep=TRUE)
+identical(agent1$partner, fake_agent1$partner) # Different!
+```
+
+
+## Inheritance
+
+`oClasses` have support for nested, linear inheritance of other oClass objects, just pass the parent generator to `inherit` during oClass creation. Let us create "Household" class that inherits from "Agent", but also has rent to pay.
+
+```{r}
+Household <- oClass(
+  "Household",
+  inherit = Agent,
+  rent = 1000
+)
+```
+
+All created instances of "Household" now have access to the `rent` variable as well as the `cash` variable from "Agent". It also uses all Agent methods such as the `transfer` function created earlier. This includes the `init.Agent` function that will automatically be called on each new Household instance until `init.Household` is defined.
+
+```{r}
+house <- Household()
+
+# Variables 
+house$rent   # from "Household"
+house$cash   # from "Agent"
+house$id     # from "Init.Agent"
+
+# Using an Agent Method
+transfer(house, agent1, -2000)
+house$cash
+```
+
+Let us create a new function that is specific to Household: paying rent. 
+
+```{r}
+# create pay_rent function that reduces cash by rent amount
+pay_rent <- function(x) UseMethod("pay_rent")
+pay_rent.Household <- function(x){
+  x$cash <- x$cash - x$rent
+  print(paste0("Household paid $", x$rent, " in rent and now has $", x$cash))
+}
+
+# pay rent :(
+pay_rent(house)
+```
+
+Agents, though, can't pay rent since they are not Households.
+
+```{r}
+## DON'T RUN:
+## pay_rent(agent1)
+##
+## Error in UseMethod("pay_rent") :  
+##   no applicable method for 'pay_rent' applied to an object of class "c('Agent', 'Instance')"
+```
+
+## Changing Generator Formals
+
+It may be desirable to change the formal arguments of the generator function to better instance creation. This is done by passing a list to `formals` at the time of generator creation. The list should be equivalent to the argument list used when creating a function. 
+
+```{r}
+Household <- oClass(
+  "Household",
+  inherit = Agent,
+  formals = list(rent, ...)
+)
+
+Household
+```
+
+Since the formal argument list is `(rent, ...)`, rent must be specified each time that an instance is created, otherwise you will get an error. Note that the dots argument, `...`, is not necessary if you want to ensure that extra variables are not added by the user at creation.
+
+When specifying formals, an associated `init` method should be created with identical arguments except for the instance. If not, then an error will likely be generated each time you attempt to create an instance.
+
+```{r}
+init.Household <- function(x, rent, ...){
+  x$rent <- rent 
+  init_next(x, ...)
+  x
+}
+
+house <- Household(500)
+house$rent
+```
+
+If the formals need to be changed later, you can use the `change_formals` function. The resulting generator function must be assigned for the changes to take hold.
+
+```{r}
+# Update the 'init' method
+init.Household <- function(x, rent = 1000, cash = 5000){
+  x$rent <- rent
+  x$cash <- cash
+  x
+}
+
+# Change the formals list
+Household <- change_formals(Household, from_init=init.Household)
+Household 
+
+# Create new instance
+house <- Household()
+house$rent
+```
+
+
+## Portable Classes
+
+The default behavior of `oClass` is that each instance only references objects from the template environment of the generator function. This reduces copying and can greatly speed up the creation time of complex objects. The side effect, though, is that changes to the generator function carry over to instances, even those already created. The other issue is that exporting instances are unlikely to carry working references to the generator function. 
+
+These issues can be solved by including `portable=TRUE` when calling `oClass`. This copies all objects into the instance and removes the generators from the search path.
+
+```{r}
+Agent <- oClass(
+  "Agent",
+  cash  = 0,
+  portable = TRUE
+)
+
+agent1 <- Agent()
+ls(agent1)        # includes "cash" from "Agent"
+
+parent.env(agent1)
+```
