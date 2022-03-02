@@ -147,7 +147,7 @@ data(cpi_data)
 
 ## -----------------------------------------------------------------------------
 train <- cpi_data[which(cpi_data$date <= as.Date("2019-12-01")),]
-test  <- cpi_data[which(cpi_data$date > as.Date("2019-12-01") && cpi_data$date < as.Date("2021-01-01")),]
+test  <- cpi_data[which(cpi_data$date > as.Date("2019-12-01") & cpi_data$date < as.Date("2021-01-01")),]
 
 ## -----------------------------------------------------------------------------
 y <- as.matrix(train$pi, ncol=1) 

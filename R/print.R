@@ -1,9 +1,9 @@
 #' @export
 #' @method print Instance
-#' @importFrom pryr address
+#' @useDynLib oops get_address
 print.Instance <- function(x, ...){
   cat(paste0(
-    "<", class(x)[1], ": ", pryr::address(x), ">\n  ", instance2text(x)
+    "<", class(x)[1], ": ", .Call("get_address", x), ">\n  ", instance2text(x)
   ))
 }
 #' @export

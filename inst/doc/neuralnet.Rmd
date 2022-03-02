@@ -247,7 +247,7 @@ Now, let us split the dataset into training and test sets that will be used for 
 
 ```{r}
 train <- cpi_data[which(cpi_data$date <= as.Date("2019-12-01")),]
-test  <- cpi_data[which(cpi_data$date > as.Date("2019-12-01") && cpi_data$date < as.Date("2021-01-01")),]
+test  <- cpi_data[which(cpi_data$date > as.Date("2019-12-01") & cpi_data$date < as.Date("2021-01-01")),]
 ```
 
 Now we train an artificial neural network with our training data.

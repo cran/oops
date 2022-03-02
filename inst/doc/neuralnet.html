@@ -12,7 +12,7 @@
 
 <meta name="author" content="Christopher Mann" />
 
-<meta name="date" content="2021-12-21" />
+<meta name="date" content="2022-03-02" />
 
 <title>Building an Artificial Neural Network with ‘oops’ Layers to Forecast Inflation</title>
 
@@ -140,7 +140,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 
 <h1 class="title toc-ignore">Building an Artificial Neural Network with ‘oops’ Layers to Forecast Inflation</h1>
 <h4 class="author">Christopher Mann</h4>
-<h4 class="date">2021-12-21</h4>
+<h4 class="date">2022-03-02</h4>
 
 
 
@@ -307,7 +307,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>  na.omit</span></code></pre></div>
 <p>Now, let us split the dataset into training and test sets that will be used for fitting and evaluating the network accordingly.</p>
 <div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>train <span class="ot">&lt;-</span> cpi_data[<span class="fu">which</span>(cpi_data<span class="sc">$</span>date <span class="sc">&lt;=</span> <span class="fu">as.Date</span>(<span class="st">&quot;2019-12-01&quot;</span>)),]</span>
-<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>test  <span class="ot">&lt;-</span> cpi_data[<span class="fu">which</span>(cpi_data<span class="sc">$</span>date <span class="sc">&gt;</span> <span class="fu">as.Date</span>(<span class="st">&quot;2019-12-01&quot;</span>) <span class="sc">&amp;&amp;</span> cpi_data<span class="sc">$</span>date <span class="sc">&lt;</span> <span class="fu">as.Date</span>(<span class="st">&quot;2021-01-01&quot;</span>)),]</span></code></pre></div>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>test  <span class="ot">&lt;-</span> cpi_data[<span class="fu">which</span>(cpi_data<span class="sc">$</span>date <span class="sc">&gt;</span> <span class="fu">as.Date</span>(<span class="st">&quot;2019-12-01&quot;</span>) <span class="sc">&amp;</span> cpi_data<span class="sc">$</span>date <span class="sc">&lt;</span> <span class="fu">as.Date</span>(<span class="st">&quot;2021-01-01&quot;</span>)),]</span></code></pre></div>
 <p>Now we train an artificial neural network with our training data.</p>
 <div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>y <span class="ot">&lt;-</span> <span class="fu">as.matrix</span>(train<span class="sc">$</span>pi, <span class="at">ncol=</span><span class="dv">1</span>) </span>
 <span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>X <span class="ot">&lt;-</span> <span class="fu">cbind</span>(<span class="dv">1</span>, <span class="fu">as.matrix</span>(train[,<span class="dv">3</span><span class="sc">:</span><span class="dv">7</span>]))</span>
@@ -330,18 +330,28 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <span id="cb16-14"><a href="#cb16-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; pi.12 -0.2635620 -0.2635620 -0.2635620 -0.2635620</span></span></code></pre></div>
 <p>To predict the level of price inflation in the next period, we take the last columns of our testing data set and feed it into the neural network. Note that this approach assumes that we are only predicting one period ahead since we are using all of the most recent data for each observation.</p>
 <div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>Xtest <span class="ot">&lt;-</span> <span class="fu">cbind</span>(<span class="dv">1</span>, <span class="fu">as.matrix</span>(test[, <span class="dv">3</span><span class="sc">:</span><span class="dv">7</span>]))</span>
-<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Warning in cbind(1, as.matrix(test[, 3:7])): number of rows of result is not a</span></span>
-<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; multiple of vector length (arg 1)</span></span>
-<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>prediction <span class="ot">&lt;-</span> <span class="fu">predict_nn</span>(nn, Xtest)</span>
-<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>prediction</span>
-<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;      [,1]</span></span>
-<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a><span class="fu">mean</span>(prediction <span class="sc">-</span> test<span class="sc">$</span>pi) <span class="co"># Average error</span></span>
-<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] NaN</span></span></code></pre></div>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>prediction <span class="ot">&lt;-</span> <span class="fu">predict_nn</span>(nn, Xtest)</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>prediction</span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;           [,1]</span></span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 877 0.02310848</span></span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 878 0.02360990</span></span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 879 0.02400029</span></span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 880 0.02346047</span></span>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 881 0.02183437</span></span>
+<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 882 0.02040416</span></span>
+<span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 883 0.02007325</span></span>
+<span id="cb17-12"><a href="#cb17-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 884 0.02045291</span></span>
+<span id="cb17-13"><a href="#cb17-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 885 0.02074300</span></span>
+<span id="cb17-14"><a href="#cb17-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 886 0.02053071</span></span>
+<span id="cb17-15"><a href="#cb17-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 887 0.02066337</span></span>
+<span id="cb17-16"><a href="#cb17-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 888 0.02092708</span></span>
+<span id="cb17-17"><a href="#cb17-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-18"><a href="#cb17-18" aria-hidden="true" tabindex="-1"></a><span class="fu">mean</span>(prediction <span class="sc">-</span> test<span class="sc">$</span>pi) <span class="co"># Average error</span></span>
+<span id="cb17-19"><a href="#cb17-19" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] 0.009243088</span></span></code></pre></div>
 <p>Note that an ordinary least squares regression actually performs better than the previous value. Artificial neural networks do not always provide superior forecasts to less sophisticated methods. A lot of tuning of model parameters and the number of types of layers are necessary to produce optimal forecasts.</p>
 <div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>ols <span class="ot">&lt;-</span> <span class="fu">lm</span>(y<span class="sc">~-</span><span class="dv">1</span><span class="sc">+</span>X, <span class="at">data =</span> train)</span>
 <span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a><span class="fu">mean</span>(Xtest <span class="sc">%*%</span> <span class="fu">as.matrix</span>(ols<span class="sc">$</span>coeff) <span class="sc">-</span> test<span class="sc">$</span>pi)</span>
-<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] NaN</span></span></code></pre></div>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] 0.0009104316</span></span></code></pre></div>
 </div>
 
 
